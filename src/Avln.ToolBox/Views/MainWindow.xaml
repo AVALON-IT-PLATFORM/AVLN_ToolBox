@@ -1,0 +1,201 @@
+<Window x:Class="Avln.ToolBox.Views.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:models="clr-namespace:Avln.ToolBox.Models"
+        Title="AVLN ToolBox"
+        Width="700"
+        MinHeight="360"
+        MaxHeight="760"
+        SizeToContent="Height"
+        WindowStartupLocation="CenterScreen"
+        Style="{StaticResource ToolBoxWindowStyle}">
+    <Border Margin="18"
+            Background="{StaticResource SurfaceBrush}"
+            BorderBrush="{StaticResource AccentBorderBrush}"
+            BorderThickness="4"
+            CornerRadius="20">
+        <Border.Effect>
+            <DropShadowEffect BlurRadius="32" ShadowDepth="10" Opacity="0.18" />
+        </Border.Effect>
+
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="62" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+
+            <Border Grid.Row="0" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,0,1">
+                <Grid Margin="22,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                        <Border Width="36" Height="36" Background="{StaticResource AccentBrush}" CornerRadius="10">
+                            <TextBlock Text="AVLN"
+                                       Foreground="White"
+                                       FontSize="12"
+                                       FontWeight="Bold"
+                                       HorizontalAlignment="Center"
+                                       VerticalAlignment="Center" />
+                        </Border>
+                        <TextBlock Margin="11,0,0,0"
+                                   Text="ToolBox"
+                                   FontSize="18"
+                                   FontWeight="SemiBold"
+                                   VerticalAlignment="Center" />
+                    </StackPanel>
+
+                    <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                        <Button Style="{StaticResource IconButtonStyle}"
+                                Command="{Binding OpenSettingsCommand}"
+                                ToolTip="Настройки">
+                            <TextBlock FontFamily="Segoe MDL2 Assets" FontSize="18" Text="&#xE713;" />
+                        </Button>
+                        <Button Margin="6,0,0,0"
+                                Style="{StaticResource IconButtonStyle}"
+                                Click="CloseButton_OnClick"
+                                ToolTip="Закрыть">
+                            <TextBlock FontFamily="Segoe MDL2 Assets" FontSize="16" Text="&#xE8BB;" />
+                        </Button>
+                    </StackPanel>
+                </Grid>
+            </Border>
+
+            <Grid Grid.Row="1" Margin="24">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+
+                <StackPanel>
+                    <TextBlock Text="Плагины Avalon" FontSize="25" FontWeight="SemiBold" />
+                    <TextBlock Margin="0,5,0,0"
+                               Text="Установка по версиям Revit"
+                               Foreground="{StaticResource MutedBrush}"
+                               FontSize="12" />
+                </StackPanel>
+
+                <TextBlock Grid.Row="1"
+                           Margin="0,20,0,10"
+                           Text="Версии"
+                           Foreground="{StaticResource MutedBrush}"
+                           FontSize="13"
+                           FontWeight="SemiBold" />
+
+                <Grid Grid.Row="2">
+                    <Border BorderBrush="{StaticResource BorderBrush}"
+                            BorderThickness="1"
+                            CornerRadius="14"
+                            ClipToBounds="True"
+                            Visibility="{Binding HasVersions, Converter={StaticResource BooleanToVisibilityConverter}}">
+                        <ScrollViewer MaxHeight="520" VerticalScrollBarVisibility="Auto">
+                            <ItemsControl ItemsSource="{Binding Versions}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Border MinHeight="64"
+                                                BorderBrush="{StaticResource BorderBrush}"
+                                                BorderThickness="0,0,0,1">
+                                            <Grid Margin="16,0,14,0">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="72" />
+                                                    <ColumnDefinition Width="*" />
+                                                    <ColumnDefinition Width="Auto" />
+                                                    <ColumnDefinition Width="36" />
+                                                </Grid.ColumnDefinitions>
+
+                                                <TextBlock Text="{Binding Year}"
+                                                           FontSize="18"
+                                                           FontWeight="SemiBold"
+                                                           VerticalAlignment="Center" />
+
+                                                <TextBlock Grid.Column="1"
+                                                           Margin="14,0"
+                                                           Text="{Binding StatusText}"
+                                                           FontSize="12"
+                                                           TextWrapping="Wrap"
+                                                           VerticalAlignment="Center">
+                                                    <TextBlock.Style>
+                                                        <Style TargetType="TextBlock">
+                                                            <Setter Property="Foreground" Value="{StaticResource MutedBrush}" />
+                                                            <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding Status}" Value="{x:Static models:PackageStatus.UpToDate}">
+                                                                    <Setter Property="Foreground" Value="{StaticResource SuccessBrush}" />
+                                                                </DataTrigger>
+                                                                <DataTrigger Binding="{Binding Status}" Value="{x:Static models:PackageStatus.UpdateAvailable}">
+                                                                    <Setter Property="Foreground" Value="{StaticResource AccentBrush}" />
+                                                                </DataTrigger>
+                                                                <DataTrigger Binding="{Binding Status}" Value="{x:Static models:PackageStatus.BrokenInstallation}">
+                                                                    <Setter Property="Foreground" Value="{StaticResource DangerBrush}" />
+                                                                </DataTrigger>
+                                                                <DataTrigger Binding="{Binding Status}" Value="{x:Static models:PackageStatus.Error}">
+                                                                    <Setter Property="Foreground" Value="{StaticResource DangerBrush}" />
+                                                                </DataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </TextBlock.Style>
+                                                </TextBlock>
+
+                                                <Button Grid.Column="2"
+                                                        Margin="0,0,8,0"
+                                                        Content="{Binding ActionText}"
+                                                        Command="{Binding ExecuteActionCommand}"
+                                                        Visibility="{Binding HasAction, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                                    <Button.Style>
+                                                        <Style TargetType="Button" BasedOn="{StaticResource PrimaryButtonStyle}">
+                                                            <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding IsBusy}" Value="True">
+                                                                    <Setter Property="IsEnabled" Value="False" />
+                                                                </DataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </Button.Style>
+                                                </Button>
+
+                                                <Button Grid.Column="3"
+                                                        Style="{StaticResource IconButtonStyle}"
+                                                        Click="MoreButton_OnClick"
+                                                        Visibility="{Binding IsInstalled, Converter={StaticResource BooleanToVisibilityConverter}}"
+                                                        ToolTip="Действия">
+                                                    <TextBlock FontSize="20" Text="⋯" />
+                                                    <Button.ContextMenu>
+                                                        <ContextMenu>
+                                                            <MenuItem Header="Удалить"
+                                                                      Foreground="{StaticResource DangerBrush}"
+                                                                      Command="{Binding PlacementTarget.DataContext.DeleteCommand, RelativeSource={RelativeSource AncestorType={x:Type ContextMenu}}}" />
+                                                        </ContextMenu>
+                                                    </Button.ContextMenu>
+                                                </Button>
+                                            </Grid>
+                                        </Border>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </ScrollViewer>
+                    </Border>
+
+                    <TextBlock Foreground="{StaticResource MutedBrush}"
+                               HorizontalAlignment="Center"
+                               Margin="0,24">
+                        <TextBlock.Style>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="Text" Value="Установленные версии Revit не найдены." />
+                                <Setter Property="Visibility" Value="Collapsed" />
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding HasVersions}" Value="False">
+                                        <Setter Property="Visibility" Value="Visible" />
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding IsLoading}" Value="True">
+                                        <Setter Property="Text" Value="Загрузка данных…" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBlock.Style>
+                    </TextBlock>
+                </Grid>
+            </Grid>
+        </Grid>
+    </Border>
+</Window>
