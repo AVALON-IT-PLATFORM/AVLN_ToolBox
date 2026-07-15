@@ -73,7 +73,7 @@ public partial class MainWindow : Window
 
     private void MoreButton_OnClick(object sender, RoutedEventArgs e)
     {
-        if (sender is Button button && button.ContextMenu is not null)
+        if (sender is System.Windows.Controls.Button button && button.ContextMenu is not null)
         {
             button.ContextMenu.PlacementTarget = button;
             button.ContextMenu.IsOpen = true;
