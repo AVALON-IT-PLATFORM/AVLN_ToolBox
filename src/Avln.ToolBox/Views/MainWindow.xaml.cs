@@ -39,7 +39,7 @@ public partial class MainWindow : Window
 
     private void MainWindow_OnClosing(object? sender, CancelEventArgs e)
     {
-        var app = (global::Avln.ToolBox.App)Application.Current;
+        var app = (global::Avln.ToolBox.App)System.Windows.Application.Current;
         if (app.IsExitRequested)
         {
             return;
@@ -67,7 +67,7 @@ public partial class MainWindow : Window
 
     private void CloseButton_OnClick(object sender, RoutedEventArgs e)
     {
-        var app = (global::Avln.ToolBox.App)Application.Current;
+        var app = (global::Avln.ToolBox.App)System.Windows.Application.Current;
         app.HideMainWindow();
     }
 
