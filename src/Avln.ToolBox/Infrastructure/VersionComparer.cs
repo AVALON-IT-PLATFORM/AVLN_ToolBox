@@ -34,7 +34,7 @@ public static class VersionComparer
             parts = parts.Take(4).ToList();
         }
 
-        return Version.TryParse(string.Join('.', parts), out var version)
+        return Version.TryParse(string.Join(".", parts), out var version)
             ? version
             : new Version(0, 0, 0);
     }
