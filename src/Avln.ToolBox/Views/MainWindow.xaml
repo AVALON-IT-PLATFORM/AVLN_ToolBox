@@ -71,7 +71,7 @@
                 </Grid.RowDefinitions>
 
                 <StackPanel>
-                    <TextBlock Text="Плагины Avalon" FontSize="25" FontWeight="SemiBold" />
+                    <TextBlock Text="Плагины проектного бюро AVLN" FontSize="25" FontWeight="SemiBold" />
                     <TextBlock Margin="0,5,0,0"
                                Text="Установка по версиям Revit"
                                Foreground="{StaticResource MutedBrush}"
