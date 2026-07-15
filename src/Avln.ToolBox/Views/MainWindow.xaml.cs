@@ -1,3 +1,4 @@
+using System.ComponentModel;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -20,6 +21,7 @@ public partial class MainWindow : Window
         DataContext = viewModel;
 
         Loaded += MainWindow_OnLoaded;
+        Closing += MainWindow_OnClosing;
         MouseLeftButtonDown += MainWindow_OnMouseLeftButtonDown;
         _viewModel.SettingsRequested += ViewModel_OnSettingsRequested;
     }
@@ -33,6 +35,18 @@ public partial class MainWindow : Window
 
         _initialized = true;
         await _viewModel.InitializeAsync();
+    }
+
+    private void MainWindow_OnClosing(object? sender, CancelEventArgs e)
+    {
+        var app = (global::Avln.ToolBox.App)Application.Current;
+        if (app.IsExitRequested)
+        {
+            return;
+        }
+
+        e.Cancel = true;
+        app.HideMainWindow();
     }
 
     private void MainWindow_OnMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
@@ -51,7 +65,11 @@ public partial class MainWindow : Window
         await _viewModel.RefreshAsync(runAutoUpdate: false);
     }
 
-    private void CloseButton_OnClick(object sender, RoutedEventArgs e) => Close();
+    private void CloseButton_OnClick(object sender, RoutedEventArgs e)
+    {
+        var app = (global::Avln.ToolBox.App)Application.Current;
+        app.HideMainWindow();
+    }
 
     private void MoreButton_OnClick(object sender, RoutedEventArgs e)
     {
@@ -64,6 +82,7 @@ public partial class MainWindow : Window
 
     protected override void OnClosed(EventArgs e)
     {
+        Closing -= MainWindow_OnClosing;
         _viewModel.SettingsRequested -= ViewModel_OnSettingsRequested;
         base.OnClosed(e);
     }
