@@ -56,7 +56,7 @@
                         <Button Margin="6,0,0,0"
                                 Style="{StaticResource IconButtonStyle}"
                                 Click="CloseButton_OnClick"
-                                ToolTip="Закрыть">
+                                ToolTip="Свернуть в трей">
                             <TextBlock FontFamily="Segoe MDL2 Assets" FontSize="16" Text="&#xE8BB;" />
                         </Button>
                     </StackPanel>
