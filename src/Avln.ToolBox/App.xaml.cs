@@ -1,4 +1,5 @@
 using System.Drawing;
+using System.Threading;
 using System.Windows;
 using System.Windows.Interop;
 using System.Windows.Media.Imaging;
@@ -12,11 +13,17 @@ namespace Avln.ToolBox;
 public partial class App : System.Windows.Application
 {
     private const string BrandIconFileName = "AVLN.ToolBox.ico";
+    private const string SingleInstanceMutexName = @"Local\AVLN.ToolBox.SingleInstance";
+    private const string ActivationEventName = @"Local\AVLN.ToolBox.Activate";
 
     private ServiceProvider? _serviceProvider;
     private Forms.NotifyIcon? _notifyIcon;
     private Forms.ContextMenuStrip? _trayMenu;
     private Icon? _brandIcon;
+    private Mutex? _instanceMutex;
+    private EventWaitHandle? _activationEvent;
+    private RegisteredWaitHandle? _activationRegistration;
+    private bool _ownsInstanceMutex;
     private bool _isExitRequested;
 
     public bool IsExitRequested => _isExitRequested;
@@ -26,12 +33,42 @@ public partial class App : System.Windows.Application
         base.OnStartup(e);
         ShutdownMode = ShutdownMode.OnExplicitShutdown;
 
+        _activationEvent = new EventWaitHandle(
+            initialState: false,
+            EventResetMode.AutoReset,
+            ActivationEventName);
+        _instanceMutex = new Mutex(
+            initiallyOwned: true,
+            SingleInstanceMutexName,
+            out var createdNew);
+        _ownsInstanceMutex = createdNew;
+
+        if (!createdNew)
+        {
+            _activationEvent.Set();
+            Shutdown();
+            return;
+        }
+
         var services = new ServiceCollection();
         services.AddToolBox();
         _serviceProvider = services.BuildServiceProvider();
 
         var mainWindow = _serviceProvider.GetRequiredService<MainWindow>();
         MainWindow = mainWindow;
+
+        _activationRegistration = ThreadPool.RegisterWaitForSingleObject(
+            _activationEvent,
+            (_, timedOut) =>
+            {
+                if (!timedOut && !_isExitRequested)
+                {
+                    Dispatcher.BeginInvoke(ShowMainWindow);
+                }
+            },
+            state: null,
+            Timeout.Infinite,
+            executeOnlyOnce: false);
 
         _brandIcon = LoadBrandIcon();
         ApplyWindowIcon(mainWindow, _brandIcon);
@@ -85,12 +122,23 @@ public partial class App : System.Windows.Application
 
     protected override void OnExit(ExitEventArgs e)
     {
+        _isExitRequested = true;
+
         if (_notifyIcon is not null)
         {
             _notifyIcon.Visible = false;
             _notifyIcon.Dispose();
         }
 
+        _activationRegistration?.Unregister(null);
+        _activationEvent?.Dispose();
+
+        if (_ownsInstanceMutex)
+        {
+            _instanceMutex?.ReleaseMutex();
+        }
+
+        _instanceMutex?.Dispose();
         _trayMenu?.Dispose();
         _brandIcon?.Dispose();
         _serviceProvider?.Dispose();
