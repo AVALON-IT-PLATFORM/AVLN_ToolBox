@@ -163,7 +163,11 @@ public partial class App : System.Windows.Application
         using var backgroundBrush = new SolidBrush(Color.FromArgb(0xB3, 0x95, 0x72));
         graphics.FillPath(backgroundBrush, backgroundPath);
 
-        using var font = new Font("Segoe UI", 58, FontStyle.Bold, GraphicsUnit.Pixel);
+        using var font = new System.Drawing.Font(
+            "Segoe UI",
+            58,
+            System.Drawing.FontStyle.Bold,
+            System.Drawing.GraphicsUnit.Pixel);
         using var foregroundBrush = new SolidBrush(Color.White);
         using var format = new StringFormat
         {
