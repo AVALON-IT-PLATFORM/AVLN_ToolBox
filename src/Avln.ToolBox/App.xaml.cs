@@ -12,7 +12,7 @@ using Forms = System.Windows.Forms;
 
 namespace Avln.ToolBox;
 
-public partial class App : Application
+public partial class App : System.Windows.Application
 {
     private const string BrandIconFileName = "AVLN.ToolBox.ico";
 
