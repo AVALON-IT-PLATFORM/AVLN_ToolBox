@@ -9,6 +9,7 @@ internal sealed class SetupInstaller
     private const string PayloadResourceName = "toolbox-payload.zip";
     private const string AppExecutableName = "AVLN.ToolBox.exe";
     private const string AppProcessName = "AVLN.ToolBox";
+    private const int CloseTimeoutMilliseconds = 5000;
 
     private readonly SetupLogger _logger;
     private readonly ShortcutService _shortcutService;
@@ -67,7 +68,7 @@ internal sealed class SetupInstaller
         _logger.Info("Extracting embedded payload.");
 
         var assembly = Assembly.GetExecutingAssembly();
-        await using var payloadStream = assembly.GetManifestResourceStream(PayloadResourceName)
+        using var payloadStream = assembly.GetManifestResourceStream(PayloadResourceName)
             ?? throw new InvalidOperationException($"В setup не встроен payload: {PayloadResourceName}.");
 
         Directory.CreateDirectory(Path.GetDirectoryName(targetZipPath)!);
@@ -95,7 +96,7 @@ internal sealed class SetupInstaller
                 }
 
                 _logger.Info($"Closing ToolBox process PID {process.Id}.");
-                if (process.CloseMainWindow() && process.WaitForExit(TimeSpan.FromSeconds(5)))
+                if (process.CloseMainWindow() && process.WaitForExit(CloseTimeoutMilliseconds))
                 {
                     continue;
                 }
@@ -104,7 +105,7 @@ internal sealed class SetupInstaller
                 {
                     _logger.Warn($"Killing ToolBox process PID {process.Id}.");
                     process.Kill(entireProcessTree: true);
-                    process.WaitForExit(TimeSpan.FromSeconds(5));
+                    process.WaitForExit(CloseTimeoutMilliseconds);
                 }
             }
             catch (Exception exception)
