@@ -1,15 +1,19 @@
 using System.Diagnostics;
 using System.IO.Compression;
-using System.Reflection;
+using System.Net.Http.Headers;
 
 namespace Avln.ToolBox.Setup;
 
 internal sealed class SetupInstaller
 {
-    private const string PayloadResourceName = "toolbox-payload.zip";
+    private const string AppArchiveFileName = "AVLN.ToolBox.App.win-x64.zip";
+    private const string ToolBoxReleaseTag = "toolbox-v0.1.0";
     private const string AppExecutableName = "AVLN.ToolBox.exe";
     private const string AppProcessName = "AVLN.ToolBox";
     private const int CloseTimeoutMilliseconds = 5000;
+
+    private static readonly Uri AppArchiveDownloadUri = new(
+        $"https://github.com/AVALON-IT-PLATFORM/AVLN_ToolBox/releases/download/{ToolBoxReleaseTag}/{AppArchiveFileName}");
 
     private readonly SetupLogger _logger;
     private readonly ShortcutService _shortcutService;
@@ -27,20 +31,20 @@ internal sealed class SetupInstaller
         var appDirectory = Path.Combine(baseDirectory, "App");
         var tempRoot = Path.Combine(baseDirectory, "Temp", $"setup-{DateTime.UtcNow:yyyyMMddHHmmssfff}");
         var tempExtractDirectory = Path.Combine(tempRoot, "payload");
-        var tempZipPath = Path.Combine(tempRoot, "toolbox-payload.zip");
+        var tempZipPath = Path.Combine(tempRoot, AppArchiveFileName);
 
         Directory.CreateDirectory(baseDirectory);
         Directory.CreateDirectory(tempRoot);
 
         try
         {
-            ExtractPayloadResource(tempZipPath);
+            DownloadPayload(tempZipPath);
             ZipFile.ExtractToDirectory(tempZipPath, tempExtractDirectory);
 
             var stagedExecutable = Path.Combine(tempExtractDirectory, AppExecutableName);
             if (!File.Exists(stagedExecutable))
             {
-                throw new InvalidOperationException($"Payload не содержит {AppExecutableName}.");
+                throw new InvalidOperationException($"Архив {AppArchiveFileName} не содержит {AppExecutableName}.");
             }
 
             StopRunningToolBox();
@@ -63,17 +67,37 @@ internal sealed class SetupInstaller
         }
     }
 
-    private void ExtractPayloadResource(string targetZipPath)
+    private void DownloadPayload(string targetZipPath)
     {
-        _logger.Info("Extracting embedded payload.");
-
-        var assembly = Assembly.GetExecutingAssembly();
-        using var payloadStream = assembly.GetManifestResourceStream(PayloadResourceName)
-            ?? throw new InvalidOperationException($"В setup не встроен payload: {PayloadResourceName}.");
+        _logger.Info($"Downloading ToolBox payload from {AppArchiveDownloadUri}.");
 
         Directory.CreateDirectory(Path.GetDirectoryName(targetZipPath)!);
+
+        using var httpClient = new HttpClient();
+        httpClient.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("AVLN.ToolBox.Setup", "1.0"));
+
+        using var response = httpClient
+            .GetAsync(AppArchiveDownloadUri, HttpCompletionOption.ResponseHeadersRead)
+            .GetAwaiter()
+            .GetResult();
+
+        if (!response.IsSuccessStatusCode)
+        {
+            throw new InvalidOperationException(
+                $"Не удалось скачать {AppArchiveFileName}: HTTP {(int)response.StatusCode} {response.ReasonPhrase}.");
+        }
+
+        using var httpStream = response.Content.ReadAsStreamAsync().GetAwaiter().GetResult();
         using var fileStream = File.Create(targetZipPath);
-        payloadStream.CopyTo(fileStream);
+        httpStream.CopyTo(fileStream);
+
+        var fileInfo = new FileInfo(targetZipPath);
+        if (!fileInfo.Exists || fileInfo.Length == 0)
+        {
+            throw new InvalidOperationException($"Скачанный архив пустой: {targetZipPath}.");
+        }
+
+        _logger.Info($"Downloaded ToolBox payload: {targetZipPath}, {fileInfo.Length} bytes.");
     }
 
     private void StopRunningToolBox()
