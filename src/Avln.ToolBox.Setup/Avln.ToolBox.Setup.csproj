@@ -12,10 +12,6 @@
     <ApplicationIcon>..\Avln.ToolBox\Assets\Brand\AVLN.ToolBox.ico</ApplicationIcon>
   </PropertyGroup>
 
-  <ItemGroup Condition="Exists('Payload\toolbox-payload.zip')">
-    <EmbeddedResource Include="Payload\toolbox-payload.zip" LogicalName="toolbox-payload.zip" />
-  </ItemGroup>
-
   <ItemGroup>
     <None Include="..\Avln.ToolBox\Assets\Brand\AVLN.ToolBox.ico" Link="AVLN.ToolBox.ico" />
   </ItemGroup>
