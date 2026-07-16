@@ -1,0 +1,24 @@
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Avln.ToolBox", "src\Avln.ToolBox\Avln.ToolBox.csproj", "{D8F3845B-7C11-4B67-96EA-62C73B47A8A9}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Avln.ToolBox.Setup", "src\Avln.ToolBox.Setup\Avln.ToolBox.Setup.csproj", "{9DB319A9-8B4D-4047-A1D9-45E9845E1386}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x64 = Debug|x64
+		Release|x64 = Release|x64
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{D8F3845B-7C11-4B67-96EA-62C73B47A8A9}.Debug|x64.ActiveCfg = Debug|x64
+		{D8F3845B-7C11-4B67-96EA-62C73B47A8A9}.Debug|x64.Build.0 = Debug|x64
+		{D8F3845B-7C11-4B67-96EA-62C73B47A8A9}.Release|x64.ActiveCfg = Release|x64
+		{D8F3845B-7C11-4B67-96EA-62C73B47A8A9}.Release|x64.Build.0 = Release|x64
+		{9DB319A9-8B4D-4047-A1D9-45E9845E1386}.Debug|x64.ActiveCfg = Debug|x64
+		{9DB319A9-8B4D-4047-A1D9-45E9845E1386}.Debug|x64.Build.0 = Debug|x64
+		{9DB319A9-8B4D-4047-A1D9-45E9845E1386}.Release|x64.ActiveCfg = Release|x64
+		{9DB319A9-8B4D-4047-A1D9-45E9845E1386}.Release|x64.Build.0 = Release|x64
+	EndGlobalSection
+EndGlobal

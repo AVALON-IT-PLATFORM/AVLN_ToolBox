@@ -1,0 +1,10 @@
+bin/
+obj/
+.vs/
+.idea/
+*.user
+*.suo
+*.cache
+artifacts/
+publish/
+src/Avln.ToolBox.Setup/Payload/*.zip

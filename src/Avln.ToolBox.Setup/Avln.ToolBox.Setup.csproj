@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <UseWindowsForms>true</UseWindowsForms>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <PlatformTarget>x64</PlatformTarget>
+    <Platforms>x64</Platforms>
+    <AssemblyName>AVLN.ToolBox.Setup</AssemblyName>
+    <RootNamespace>Avln.ToolBox.Setup</RootNamespace>
+    <ApplicationIcon>..\Avln.ToolBox\Assets\Brand\AVLN.ToolBox.ico</ApplicationIcon>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="..\Avln.ToolBox\Assets\Brand\AVLN.ToolBox.ico" Link="AVLN.ToolBox.ico" />
+  </ItemGroup>
+</Project>
