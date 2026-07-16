@@ -1,4 +1,5 @@
 using System.IO.Compression;
+using System.Xml.Linq;
 using Avln.ToolBox.Infrastructure;
 using Avln.ToolBox.Models;
 using Microsoft.Extensions.Logging;
@@ -7,6 +8,10 @@ namespace Avln.ToolBox.Services;
 
 public sealed class PackageInstallService
 {
+    private const string AddinFileName = "Avalon.External.addin";
+    private const string PluginDirectoryName = "AvalonPluginsExternal";
+    private const string ExternalDllFileName = "Avalon.External.dll";
+
     private readonly HttpClient _httpClient;
     private readonly AppPaths _paths;
     private readonly InstalledStateService _installedStateService;
@@ -70,6 +75,7 @@ public sealed class PackageInstallService
                 ZipFile.ExtractToDirectory(archivePath, stagingDirectory, true);
                 var packageRoot = ResolvePackageRoot(stagingDirectory);
                 ValidatePackage(packageRoot);
+                PatchAddinManifest(packageRoot, installDirectory);
                 var packageFiles = GetPackageFiles(packageRoot);
 
                 var state = await _installedStateService.LoadAsync(cancellationToken);
@@ -193,14 +199,42 @@ public sealed class PackageInstallService
 
     private static void ValidatePackage(string packageRoot)
     {
-        var addinPath = Path.Combine(packageRoot, "Avalon.External.addin");
-        var dllPath = Path.Combine(packageRoot, "Avalon.External.dll");
+        var addinPath = Path.Combine(packageRoot, AddinFileName);
+        var dllPath = Path.Combine(packageRoot, PluginDirectoryName, ExternalDllFileName);
 
         if (!File.Exists(addinPath) || !File.Exists(dllPath))
         {
             throw new InvalidDataException(
-                "Package root must contain Avalon.External.addin and Avalon.External.dll.");
+                $"Package root must contain {AddinFileName} and {PluginDirectoryName}\\{ExternalDllFileName}.");
         }
+    }
+
+    private static void PatchAddinManifest(string packageRoot, string installDirectory)
+    {
+        var addinPath = Path.Combine(packageRoot, AddinFileName);
+        var targetAssemblyPath = Path.Combine(installDirectory, PluginDirectoryName, ExternalDllFileName);
+
+        XDocument document;
+        try
+        {
+            document = XDocument.Load(addinPath, LoadOptions.PreserveWhitespace);
+        }
+        catch (Exception exception)
+        {
+            throw new InvalidDataException($"{AddinFileName} is not a valid XML file.", exception);
+        }
+
+        var assemblyElement = document
+            .Descendants()
+            .FirstOrDefault(element =>
+                string.Equals(element.Name.LocalName, "Assembly", StringComparison.OrdinalIgnoreCase));
+        if (assemblyElement is null)
+        {
+            throw new InvalidDataException($"{AddinFileName} must contain Assembly element.");
+        }
+
+        assemblyElement.Value = targetAssemblyPath;
+        document.Save(addinPath);
     }
 
     private static IReadOnlyList<string> GetPackageFiles(string packageRoot)
